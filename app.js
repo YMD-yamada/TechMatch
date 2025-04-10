@@ -48,6 +48,7 @@ const scoreMap = {
 };
 
 let current = 0;
+let userAnswers = [];
 let answers = [];
 let scores = {}; let salesFilter = false;
 
@@ -62,7 +63,7 @@ function showQuestion() {
     btn.textContent = ans;
     btn.className = "bg-blue-100 hover:bg-blue-200 px-4 py-2 rounded text-left";
     btn.onclick = () => {
-      answers.push(ans);
+      userAnswers[current] = ans;
       let key = ans;
       if (current === 2) key = ans + "_team";
       if (current === 3) key = ans + "_improve";
@@ -78,7 +79,10 @@ function showQuestion() {
         }
       }
 
+      
       current++;
+      userAnswers.length = current;
+    
       if (current < questions.length) {
         showQuestion();
       } else {
@@ -91,11 +95,31 @@ function showQuestion() {
 }
 
 if (location.pathname.includes("quiz.html")) {
-  window.onload = showQuestion;
+  
+    window.onload = function() {
+      showQuestion();
+      const backBtn = document.getElementById("backBtn");
+      backBtn.onclick = () => {
+        if (current > 0) {
+          current--;
+          showQuestion();
+        }
+      };
+    };
+    
 }
 
 if (location.pathname.includes("result.html")) {
-  const scores = JSON.parse(localStorage.getItem("userScores") || "{}");
+  
+    const scores = JSON.parse(localStorage.getItem("userScores") || "{}");
+
+    const userAnswers = JSON.parse(localStorage.getItem("userAnswers") || "[]");
+    const isTech = scores.major_info || scores.major_mechanical || scores.major_electrical || scores.major_physics;
+
+    function hasAnswer(keyword) {
+      return userAnswers.some(ans => ans && ans.includes(keyword));
+    }
+    
 
   fetch("departments.json")
     .then(res => res.json())
@@ -119,7 +143,14 @@ if (location.pathname.includes("result.html")) {
           const [k, v] = item.split(":");
           if (scores[k]) total += scores[k] * parseInt(v);
         }
-        return { ...d, score: total };
+        
+    // 特定条件に応じて重み補正
+    let boost = 0;
+    if (isTech && d.課名.includes("第３設計開発本部") && hasAnswer("医療")) boost += 5;
+    if (isTech && (d.課名.includes("第１設計開発本部") || d.課名.includes("第２設計開発本部")) && hasAnswer("試験")) boost += 5;
+    if (isTech && d.課名.includes("生産技術課") && hasAnswer("改善")) boost += 5;
+    return { ...d, score: total + boost };
+    
       }).sort((a, b) => b.score - a.score);
 
       const top = ranked.slice(0, 3);
