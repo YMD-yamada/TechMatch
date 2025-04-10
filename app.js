@@ -36,7 +36,7 @@ if (location.pathname.includes("quiz.html")) showQuestion();
 
 if (location.pathname.includes("result.html")) {
   const userAns = JSON.parse(localStorage.getItem("answers"));
-  fetch("dept_master.json")
+  fetch("/TechMatch/dept_master.json")
     .then(res => res.json())
     .then(data => {
       const major = userAns[0];
