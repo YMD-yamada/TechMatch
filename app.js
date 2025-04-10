@@ -49,7 +49,7 @@ const scoreMap = {
 
 let current = 0;
 let answers = [];
-let scores = {};
+let scores = {}; let salesFilter = false;
 
 function showQuestion() {
   const q = questions[current];
@@ -69,7 +69,10 @@ function showQuestion() {
       if (current === 4) key = ans + "_medical";
       if (current === 5) key = ans + "_test";
 
+      
+      if (key === "営業・顧客対応") salesFilter = true;
       if (scoreMap[key]) {
+
         for (const [k, v] of Object.entries(scoreMap[key])) {
           scores[k] = (scores[k] || 0) + v;
         }
@@ -97,8 +100,15 @@ if (location.pathname.includes("result.html")) {
   fetch("departments.json")
     .then(res => res.json())
     .then(data => {
-      // 類似度スコアで並べ替え
-      const ranked = data.map(d => {
+      
+      // 類似度スコアで並べ替え（営業フィルタ適用）
+      const filtered = data.filter(d => {
+        const raw = (d["修正用_分類パラメータ（重み付き,カンマ区切り）"] || "");
+        const hasSales = raw.includes("sales:");
+        return salesFilter || !hasSales;
+      });
+
+      const ranked = filtered.map(d => {
         const allParams = [
           d["修正用_分類パラメータ（重み付き,カンマ区切り）"],
           d["修正用_製品分野（重み付き,カンマ区切り）"],
