@@ -1,101 +1,129 @@
 
 const questions = [
-  { q: "あなたの大学での専攻は？", a: ["情報系", "機械系", "電気電子系", "文系", "医療・バイオ系", "その他"] },
-  { q: "興味がある分野は？", a: ["開発", "営業", "企画", "管理", "研究", "生産"] },
-  { q: "新しい仕組みを考えるのが好き？", a: ["はい", "いいえ"] },
-  { q: "チームで働くのは得意？", a: ["はい", "いいえ"] }
+  {
+    q: "あなたの専攻は？",
+    a: ["情報系", "機械系", "電気電子系", "医・薬・バイオ系", "物理・計測系", "文系／その他"]
+  },
+  {
+    q: "興味のある業務は？",
+    a: ["開発（ソフト・製品）", "設計・構造", "品質・検査", "営業・顧客対応", "管理・戦略・総務", "物流・調達"]
+  },
+  {
+    q: "チームで働くのが好き？",
+    a: ["はい", "いいえ"]
+  },
+  {
+    q: "改善・効率化が得意？",
+    a: ["はい", "いいえ"]
+  },
+  {
+    q: "医療機器に関心はありますか？",
+    a: ["ある", "ない"]
+  },
+  {
+    q: "試験機・計測に興味は？",
+    a: ["ある", "ない"]
+  }
 ];
+
+const scoreMap = {
+  "情報系": {"major_info": 3, "software": 1},
+  "機械系": {"major_mechanical": 3, "mechanical": 1},
+  "電気電子系": {"major_electrical": 3, "electrical": 1},
+  "医・薬・バイオ系": {"major_biomedical": 3, "medical": 1},
+  "物理・計測系": {"major_physics": 3, "measurement": 1},
+  "文系／その他": {"major_general": 3},
+
+  "開発（ソフト・製品）": {"software": 2},
+  "設計・構造": {"mechanical": 2},
+  "品質・検査": {"qa": 2},
+  "営業・顧客対応": {"sales": 2, "major_management": 1},
+  "管理・戦略・総務": {"planning": 2, "admin": 1},
+  "物流・調達": {"logistics": 2},
+
+  "はい_team": {"sales": 1, "admin": 1},
+  "はい_improve": {"planning": 2, "qa": 1},
+  "ある_medical": {"medical_device": 2, "major_biomedical": 1},
+  "ある_test": {"vehicle_measurement": 2, "measurement": 1}
+};
 
 let current = 0;
 let answers = [];
+let scores = {};
 
 function showQuestion() {
   const q = questions[current];
   document.getElementById("question").textContent = q.q;
-  const ansDiv = document.getElementById("answers");
-  ansDiv.innerHTML = "";
-  q.a.forEach(choice => {
+  const answersDiv = document.getElementById("answers");
+  answersDiv.innerHTML = "";
+
+  q.a.forEach(ans => {
     const btn = document.createElement("button");
-    btn.className = "border border-gray-300 py-2 rounded hover:bg-gray-100";
-    btn.textContent = choice;
+    btn.textContent = ans;
+    btn.className = "bg-blue-100 hover:bg-blue-200 px-4 py-2 rounded text-left";
     btn.onclick = () => {
-      answers.push(choice);
+      answers.push(ans);
+      let key = ans;
+      if (current === 2) key = ans + "_team";
+      if (current === 3) key = ans + "_improve";
+      if (current === 4) key = ans + "_medical";
+      if (current === 5) key = ans + "_test";
+
+      if (scoreMap[key]) {
+        for (const [k, v] of Object.entries(scoreMap[key])) {
+          scores[k] = (scores[k] || 0) + v;
+        }
+      }
+
       current++;
       if (current < questions.length) {
         showQuestion();
       } else {
-        localStorage.setItem("answers", JSON.stringify(answers));
+        localStorage.setItem("userScores", JSON.stringify(scores));
         window.location.href = "result.html";
       }
     };
-    ansDiv.appendChild(btn);
+    answersDiv.appendChild(btn);
   });
 }
 
-if (location.pathname.includes("quiz.html")) showQuestion();
+if (location.pathname.includes("quiz.html")) {
+  window.onload = showQuestion;
+}
 
 if (location.pathname.includes("result.html")) {
-  const userAns = JSON.parse(localStorage.getItem("answers"));
-  fetch("/TechMatch/dept_master.json")
+  const scores = JSON.parse(localStorage.getItem("userScores") || "{}");
+
+  fetch("departments.json")
     .then(res => res.json())
     .then(data => {
-      const major = userAns[0];
-      const interest = userAns[1];
-
-      const paramMap = {
-        "開発": "software",
-        "営業": "sales",
-        "研究": "measurement",
-        "管理": "admin",
-        "企画": "general",
-        "生産": "mechanical"
-      };
-      const matchParam = paramMap[interest] || "";
-
-      let candidates = data.filter(d => d.推奨専攻 === major);
-      let refined = candidates.filter(d => d.分類パラメータ === matchParam);
-      if (refined.length === 0) refined = candidates;
-      if (refined.length === 0) refined = data;
-
-      const match = refined[0];
-      document.getElementById("match").textContent = match.課名 + "（" + match.本部 + "）";
-      document.getElementById("feature").textContent = match.特徴;
-      document.getElementById("detail").textContent = match.詳細;
-
-      // リンクを補足（例：A&D公式ページ対応）
-      const linkMap = {
-        "営業": "https://www.aandd.co.jp/company/sales/",
-        "生産技術課": "https://www.aandd.co.jp/company/production/",
-        "品質": "https://www.aandd.co.jp/company/quality/"
-      };
-      for (const key in linkMap) {
-        if (match.課名.includes(key)) {
-          const link = document.createElement("a");
-          link.href = linkMap[key];
-          link.target = "_blank";
-          link.className = "text-blue-600 underline block mt-4";
-          link.textContent = "詳しくはこちら（A&D公式サイト）";
-          document.querySelector("body > div").appendChild(link);
-          break;
+      // 類似度スコアで並べ替え
+      const ranked = data.map(d => {
+        const allParams = [
+          d["修正用_分類パラメータ（重み付き,カンマ区切り）"],
+          d["修正用_製品分野（重み付き,カンマ区切り）"],
+          d["修正用_専攻パラメータ（重み付き,カンマ区切り）"]
+        ].filter(Boolean).join(",").split(",");
+        let total = 0;
+        for (const item of allParams) {
+          const [k, v] = item.split(":");
+          if (scores[k]) total += scores[k] * parseInt(v);
         }
-      }
+        return { ...d, score: total };
+      }).sort((a, b) => b.score - a.score);
 
-      // 生産技術課を追加推奨（技術系の場合）
-      const techParams = ["mechanical", "electrical", "software", "measurement"];
-      if (techParams.includes(match.分類パラメータ)) {
-        const prod = data.find(d => d.課名 === "生産技術課");
-        if (prod) {
-          const div = document.createElement("div");
-          div.className = "mt-8 text-left border-t pt-4";
-          div.innerHTML = `
-            <h3 class="text-xl font-bold text-green-700">同時におすすめ：</h3>
-            <p class="font-semibold mt-2">${prod.課名}（${prod.本部}）</p>
-            <p class="text-sm text-gray-600">${prod.特徴}</p>
-            <p class="text-sm whitespace-pre-wrap mt-1">${prod.詳細}</p>
-            <a href="https://www.aandd.co.jp/company/production/" target="_blank" class="text-blue-600 underline block mt-2">生産技術課について詳しく見る</a>
-          `;
-          document.querySelector("body > div").appendChild(div);
-        }
-      }
+      const top = ranked.slice(0, 3);
+      const container = document.getElementById("resultContainer");
+
+      top.forEach(d => {
+        const div = document.createElement("div");
+        div.className = "border-t pt-4 mt-4 text-left";
+        div.innerHTML = `
+          <h3 class="text-xl font-bold mb-1">${d.課名}（${d.本部}）</h3>
+          <p class="text-sm text-gray-600 mb-1">${d.特徴}</p>
+          <p class="text-sm text-gray-700 whitespace-pre-wrap">${d["整形済み詳細"]}</p>
+        `;
+        container.appendChild(div);
+      });
     });
 }
