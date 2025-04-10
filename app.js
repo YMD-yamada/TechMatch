@@ -40,13 +40,47 @@ if (location.pathname.includes("result.html")) {
     .then(res => res.json())
     .then(data => {
       const major = userAns[0];
-      const match = data.find(d => d.推奨専攻 === major) || data[0];
+      const interest = userAns[1];
 
+      const paramMap = {
+        "開発": "software",
+        "営業": "sales",
+        "研究": "measurement",
+        "管理": "admin",
+        "企画": "general",
+        "生産": "mechanical"
+      };
+      const matchParam = paramMap[interest] || "";
+
+      let candidates = data.filter(d => d.推奨専攻 === major);
+      let refined = candidates.filter(d => d.分類パラメータ === matchParam);
+      if (refined.length === 0) refined = candidates;
+      if (refined.length === 0) refined = data;
+
+      const match = refined[0];
       document.getElementById("match").textContent = match.課名 + "（" + match.本部 + "）";
       document.getElementById("feature").textContent = match.特徴;
       document.getElementById("detail").textContent = match.詳細;
 
-      // 技術系の場合は生産技術課も推奨表示
+      // リンクを補足（例：A&D公式ページ対応）
+      const linkMap = {
+        "営業": "https://www.aandd.co.jp/company/sales/",
+        "生産技術課": "https://www.aandd.co.jp/company/production/",
+        "品質": "https://www.aandd.co.jp/company/quality/"
+      };
+      for (const key in linkMap) {
+        if (match.課名.includes(key)) {
+          const link = document.createElement("a");
+          link.href = linkMap[key];
+          link.target = "_blank";
+          link.className = "text-blue-600 underline block mt-4";
+          link.textContent = "詳しくはこちら（A&D公式サイト）";
+          document.querySelector("body > div").appendChild(link);
+          break;
+        }
+      }
+
+      // 生産技術課を追加推奨（技術系の場合）
       const techParams = ["mechanical", "electrical", "software", "measurement"];
       if (techParams.includes(match.分類パラメータ)) {
         const prod = data.find(d => d.課名 === "生産技術課");
@@ -58,6 +92,7 @@ if (location.pathname.includes("result.html")) {
             <p class="font-semibold mt-2">${prod.課名}（${prod.本部}）</p>
             <p class="text-sm text-gray-600">${prod.特徴}</p>
             <p class="text-sm whitespace-pre-wrap mt-1">${prod.詳細}</p>
+            <a href="https://www.aandd.co.jp/company/production/" target="_blank" class="text-blue-600 underline block mt-2">生産技術課について詳しく見る</a>
           `;
           document.querySelector("body > div").appendChild(div);
         }
