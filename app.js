@@ -27,11 +27,11 @@ const questions = [
 ];
 
 const scoreMap = {
-  "情報系": {"major_info": 3, "software": 1},
-  "機械系": {"major_mechanical": 3, "mechanical": 1},
-  "電気電子系": {"major_electrical": 3, "electrical": 1},
+  "情報系": {"major_info": 3, "software": 2},
+  "機械系": {"major_mechanical": 3, "mechanical": 2},
+  "電気電子系": {"major_electrical": 3, "electrical": 2},
   "医・薬・バイオ系": {"major_biomedical": 3, "medical": 1},
-  "物理・計測系": {"major_physics": 3, "measurement": 1},
+  "物理・計測系": {"major_physics": 3, "measurement": 2},
   "文系／その他": {"major_general": 3},
 
   "開発（ソフト・製品）": {"software": 2},
