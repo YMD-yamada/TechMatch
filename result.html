@@ -3,16 +3,20 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TechMatch - 結果</title>
-  <script src="script.js" defer></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>診断結果</title>
+  <script src="app.js" defer></script>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
 <body class="bg-white text-gray-900">
-  <div class="max-w-xl mx-auto p-6 text-center">
-    <h2 class="text-3xl font-bold mb-4" id="resultTitle">診断結果</h2>
-    <p class="mb-4" id="resultText">あなたにおすすめの部署は...</p>
-    <a href="index.html" class="inline-block mt-6 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">もう一度診断</a>
+  <div class="max-w-xl mx-auto p-4 text-center">
+    <h2 class="text-3xl font-bold mb-4">診断結果</h2>
+    <p class="mb-2 text-lg font-semibold" id="match"></p>
+    <p class="mb-4 text-sm text-gray-600" id="feature"></p>
+    <p class="text-sm text-left whitespace-pre-wrap" id="detail"></p>
+    <div class="mt-6">
+      <a href="quiz.html" class="text-blue-600 underline">もう一度診断する</a>
+    </div>
   </div>
 </body>
 </html>
