@@ -149,7 +149,10 @@ if (location.pathname.includes("result.html")) {
     if (isTech && d.課名.includes("第３設計開発本部") && hasAnswer("医療")) boost += 5;
     if (isTech && (d.課名.includes("第１設計開発本部") || d.課名.includes("第２設計開発本部")) && hasAnswer("試験")) boost += 5;
     if (isTech && d.課名.includes("生産技術課") && hasAnswer("改善")) boost += 5;
+    
+    if (d.課名.includes("生産技術課")) boost += 2;
     return { ...d, score: total + boost };
+    
     
       }).sort((a, b) => b.score - a.score);
 
