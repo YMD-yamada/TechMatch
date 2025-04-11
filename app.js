@@ -213,3 +213,57 @@ if (location.pathname.includes("result.html")) {
       });
     });
 }
+
+
+if (location.pathname.includes("result.html")) {
+  const scores = JSON.parse(localStorage.getItem("userScores") || "{}");
+
+  const hqLinks = {
+  "設計開発本部": "hq_pages/設計開発本部.html",
+  "管理本部": "hq_pages/管理本部.html",
+  "社長直轄部門": "hq_pages/社長直轄部門.html",
+  "営業本部": "hq_pages/営業本部.html",
+  "生産本部": "hq_pages/生産本部.html",
+  "第1設計開発本部": "hq_pages/第1設計開発本部.html",
+  "第2設計開発本部": "hq_pages/第2設計開発本部.html",
+  "第3設計開発本部": "hq_pages/第3設計開発本部.html"
+};
+
+  fetch("departments.json")
+    .then(res => res.json())
+    .then(data => {
+      const ranked = data.map(dept => {
+        const keys = [
+          dept["修正用_分類パラメータ（重み付き,カンマ区切り）"],
+          dept["修正用_製品分野（重み付き,カンマ区切り）"],
+          dept["修正用_専攻パラメータ（重み付き,カンマ区切り）"]
+        ].filter(Boolean).join(",").split(",");
+
+        let total = 0;
+        keys.forEach(kv => {
+          const [k, v] = kv.split(":");
+          if (scores[k]) {
+            total += scores[k] * parseInt(v);
+          }
+        });
+
+        return { ...dept, score: total };
+      }).sort((a, b) => b.score - a.score);
+
+      const top = ranked.slice(0, 3);
+      const container = document.getElementById("resultContainer");
+
+      top.forEach(d => {
+        const div = document.createElement("div");
+        const link = hqLinks[d.本部];
+        div.className = "bg-white border rounded shadow p-4";
+        div.innerHTML = `
+          <h2 class="text-xl font-bold mb-1">${d.課名}（${d.本部}）</h2>
+          <p class="text-sm text-gray-600 mb-1">${d.特徴}</p>
+          <p class="text-sm text-gray-800 whitespace-pre-wrap">${d["整形済み詳細"]}</p>
+          ${link ? `<a href="${link}" target="_blank" class="text-blue-600 underline mt-2 inline-block">この部署の詳細を見る</a>` : ""}
+`;
+        container.appendChild(div);
+      });
+    });
+}
