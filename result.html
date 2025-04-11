@@ -1,1 +1,21 @@
-<html><body><h2>診断結果</h2><pre id="result"></pre><script src="app.js"></script></body></html>
+
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>診断結果 | TechMatch</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <script src="app.js" defer></script>
+</head>
+<body class="bg-gray-50 text-gray-900">
+  <div class="max-w-4xl mx-auto px-4 py-10">
+    <div class="flex justify-between items-center mb-6">
+      <img src="logo.png" alt="A&Dロゴ" class="h-10" />
+      <a href="index.html" class="text-sm text-blue-600 underline">← 最初に戻る</a>
+    </div>
+    <h1 class="text-2xl font-bold text-blue-800 mb-6 text-center">あなたにおすすめの部署</h1>
+    <div id="resultContainer" class="space-y-6"></div>
+  </div>
+</body>
+</html>

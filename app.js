@@ -11,7 +11,7 @@ const questions = [
     ]
   },
   {
-    "q": "どんな業務に興味がありますか？",
+    "q": "興味のある業務は？",
     "a": [
       "開発（ソフト・製品）",
       "設計・構造",
@@ -22,7 +22,7 @@ const questions = [
     ]
   },
   {
-    "q": "気になる製品分野を教えてください。",
+    "q": "興味がある製品群は？",
     "a": [
       "医療機器",
       "試験機・計測",
@@ -30,14 +30,14 @@ const questions = [
     ]
   },
   {
-    "q": "改善や効率化を考えるのは得意ですか？",
+    "q": "改善・効率化が得意？",
     "a": [
       "はい",
       "いいえ"
     ]
   },
   {
-    "q": "海外で働くことや海外との関わりに興味はありますか？",
+    "q": "海外に興味はありますか？",
     "a": [
       "ある",
       "ない"
@@ -151,7 +151,7 @@ function showQuestion() {
     btn.textContent = ans;
     btn.className = "bg-blue-100 hover:bg-blue-300 px-4 py-2 rounded";
     btn.onclick = () => {
-      const key = questions[current].q;
+      const key = q.q;
       if (scoreMap[key] && scoreMap[key][ans]) {
         const map = scoreMap[key][ans];
         for (const k in map) {
@@ -176,5 +176,40 @@ if (location.pathname.includes("quiz.html")) {
 
 if (location.pathname.includes("result.html")) {
   const scores = JSON.parse(localStorage.getItem("userScores") || "{}");
-  document.getElementById("result").innerText = JSON.stringify(scores, null, 2);
+
+  fetch("departments.json")
+    .then(res => res.json())
+    .then(data => {
+      const ranked = data.map(dept => {
+        const keys = [
+          dept["修正用_分類パラメータ（重み付き,カンマ区切り）"],
+          dept["修正用_製品分野（重み付き,カンマ区切り）"],
+          dept["修正用_専攻パラメータ（重み付き,カンマ区切り）"]
+        ].filter(Boolean).join(",").split(",");
+
+        let total = 0;
+        keys.forEach(kv => {
+          const [k, v] = kv.split(":");
+          if (scores[k]) {
+            total += scores[k] * parseInt(v);
+          }
+        });
+
+        return { ...dept, score: total };
+      }).sort((a, b) => b.score - a.score);
+
+      const top = ranked.slice(0, 3);
+      const container = document.getElementById("resultContainer");
+
+      top.forEach(d => {
+        const div = document.createElement("div");
+        div.className = "bg-white border rounded shadow p-4";
+        div.innerHTML = `
+          <h2 class="text-xl font-bold mb-1">${d.課名}（${d.本部}）</h2>
+          <p class="text-sm text-gray-600 mb-1">${d.特徴}</p>
+          <p class="text-sm text-gray-800 whitespace-pre-wrap">${d["整形済み詳細"]}</p>
+        `;
+        container.appendChild(div);
+      });
+    });
 }
