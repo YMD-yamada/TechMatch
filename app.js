@@ -282,13 +282,15 @@ if (location.pathname.includes("quiz.html")) {
 }
 
 
-// result.html: 回答に応じた部署表示
+// result.html: 回答に応じた部署表示（重複除去付き）
 fetch("recommend_result_map_with_hq.json")
   .then(res => res.json())
   .then(resultMap => {
     if (location.pathname.includes("result.html")) {
       const answers = JSON.parse(localStorage.getItem("userAnswers") || "{}");
       const container = document.getElementById("resultContainer");
+      const shown = new Set();
+
       let found = [];
 
       for (const q in answers) {
@@ -296,7 +298,11 @@ fetch("recommend_result_map_with_hq.json")
         const matched = resultMap[q] && resultMap[q][a];
         if (matched) {
           matched.forEach(d => {
-            found.push({ ...d, 質問: q, 回答: a });
+            const key = `${d.部署名}_${q}_${a}`;
+            if (!shown.has(key)) {
+              shown.add(key);
+              found.push({ ...d, 質問: q, 回答: a });
+            }
           });
         }
       }
