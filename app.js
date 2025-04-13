@@ -322,3 +322,51 @@ fetch("recommend_result_map_with_hq.json")
       }
     }
   });
+
+
+fetch("recommend_result_map_with_hq.json")
+  .then(res => res.json())
+  .then(resultMap =>
+    fetch("hq_department_details.json")
+      .then(res => res.json())
+      .then(deptDetails => {
+        if (location.pathname.includes("result.html")) {
+          const answers = JSON.parse(localStorage.getItem("userAnswers") || "{}");
+          const container = document.getElementById("resultContainer");
+          const shown = new Set();
+          let found = [];
+
+          for (const q in answers) {
+            const a = answers[q];
+            const matched = resultMap[q] && resultMap[q][a];
+            if (matched) {
+              matched.forEach(d => {
+                const key = `${d.部署名}_${q}_${a}`;
+                if (!shown.has(key)) {
+                  shown.add(key);
+                  const info = deptDetails[d.部署名] || {};
+                  found.push({
+                    ...d,
+                    特徴: info.特徴 || "特徴情報は登録されていません。",
+                    詳細: info.詳細 || "詳細情報は登録されていません。",
+                    質問: q,
+                    回答: a
+                  });
+                }
+              });
+            }
+          }
+
+          found.forEach(d => {
+            const div = document.createElement("div");
+            div.className = "bg-white border rounded shadow p-4 mb-4";
+            div.innerHTML = `
+              <h2 class="text-lg font-bold">${d.部署名}（${d.本部名}）</h2>
+              <p class="text-sm text-gray-600 mb-1">［${d.質問}］${d.回答} に基づくおすすめ部署</p>
+              <p class="text-sm"><strong>特徴：</strong>${d.特徴}</p>
+              <p class="text-sm text-gray-700"><strong>詳細：</strong>${d.詳細}</p>
+            `;
+            container.appendChild(div);
+          });
+        }
+      }));
