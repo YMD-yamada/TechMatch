@@ -267,3 +267,16 @@ if (location.pathname.includes("result.html")) {
       });
     });
 }
+
+
+if (location.pathname.includes("quiz.html")) {
+  const backBtn = document.getElementById("backBtn");
+  if (backBtn) {
+    backBtn.addEventListener("click", () => {
+      if (current > 0) {
+        current--;
+        showQuestion();
+      }
+    });
+  }
+}
