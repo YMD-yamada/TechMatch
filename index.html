@@ -1,12 +1,44 @@
 
-<html>
-  <body class="text-center bg-white text-gray-900 py-10">
-    <a href="https://www.aandd.co.jp/" target="_blank">
-      <img src="logo.png" alt="A&Dロゴ" class="h-10 mb-4 mx-auto" />
-    </a>
-    <h1 class="text-3xl font-bold mb-6 text-blue-800">TechMatch 適正部署診断</h1>
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <title>TechMatch 診断</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet" />
+  <script>
+    function copyURL() {
+      navigator.clipboard.writeText(window.location.href).then(() => {
+        alert('URLをコピーしました！');
+      });
+    }
+  </script>
+</head>
+<body class="bg-blue-50 text-gray-900">
+  <div class="text-center mt-6 mb-4">
+    
+  </div>
+  <div class="text-center mt-4">
+    <a href="https://www.aandd.co.jp/recruit/new_graduate/career/works/" target="_blank" class="text-blue-600 underline">▶ A&D新卒採用・職種紹介ページを見る</a>
+  </div>
+  <div class="max-w-xl mx-auto py-10 px-4 text-center">
+    <a href="https://www.aandd.co.jp/" target="_blank"><img src="logo.png" alt="A&Dロゴ" class="mx-auto h-12 mb-6" />
+    <h1 class="text-3xl font-bold text-blue-800 mb-4">TechMatch 適正部署診断</h1>
+    <p class="mb-6 text-gray-700">あなたにぴったりの部署を、簡単な質問でご案内します。</p>
     <a href="quiz.html" class="bg-blue-600 text-white px-6 py-3 rounded shadow hover:bg-blue-700 transition">
       診断をはじめる
     </a>
-  </body>
+    <div class="mt-6 text-sm space-y-2 text-blue-600">
+      <p><a href="guide.html" class="underline">▶ 使い方を見る</a></p>
+      <p><a href="demo.html" class="underline">▶ デモ資料を見る</a></p>
+    </div>
+    <div class="mt-8">
+      <button onclick="copyURL()" class="text-blue-800 underline">🔗 このページのURLをコピー</button>
+    </div>
+    <div class="mt-4">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=https://ymd-yamada.github.io/TechMatch/index.html" alt="QRコード" class="mx-auto" />
+      <p class="text-sm text-gray-500 mt-2">このページのQRコード</p>
+    </div>
+  </div>
+</body>
 </html>
