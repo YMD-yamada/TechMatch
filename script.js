@@ -34,10 +34,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  const uniqueDepts = [...new Set(matchedDepts)];
-  const displayDepts = uniqueDepts.length > 0 ? uniqueDepts : ["生産技術課"];
+  // 重複を除去
+  let uniqueDepts = [...new Set(matchedDepts)];
 
-  for (const dept of displayDepts) {
+  // 生産技術課を補助的に追加（既に含まれていなければ）
+  if (!uniqueDepts.includes("生産技術課")) {
+    uniqueDepts.push("生産技術課");
+  }
+
+  for (const dept of uniqueDepts) {
     const card = document.createElement("div");
     card.className = "bg-white shadow-md rounded-lg p-6";
 
@@ -62,7 +67,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       content.textContent = "この部署の情報は見つかりませんでした。";
     }
 
-    // 本部ページへのリンク（中身は表示しない）
     const hq = departmentToHq[dept] || "設計開発本部";
     const hqHtmlPath = `hq_pages/${hq}.html`;
 
