@@ -3,16 +3,17 @@ document.addEventListener("DOMContentLoaded", async () => {
   const resultContainer = document.getElementById("resultContainer");
 
   const userAnswersRaw = localStorage.getItem("userAnswers");
-  console.log("📦 userAnswersRaw:", userAnswersRaw);
   const userAnswers = JSON.parse(userAnswersRaw || "[]");
 
-  const [recommendMapRes, deptToHqRes] = await Promise.all([
+  const [recommendMapRes, deptToHqRes, hqDetailRes] = await Promise.all([
     fetch("recommend_result_map_with_hq.json"),
-    fetch("department_to_hq.json")
+    fetch("department_to_hq.json"),
+    fetch("hq_department_details.json")
   ]);
 
   const recommendMap = await recommendMapRes.json();
   const departmentToHq = await deptToHqRes.json();
+  const hqDetails = await hqDetailRes.json();
 
   const questionKeys = Object.keys(recommendMap);
   const matchedDepts = [];
@@ -48,26 +49,29 @@ document.addEventListener("DOMContentLoaded", async () => {
     const content = document.createElement("div");
     content.className = "text-sm text-gray-700 mb-2";
 
+    // 対象部署の特徴・詳細を表示
+    const deptInfo = hqDetails[dept];
+    if (deptInfo) {
+      const feature = document.createElement("p");
+      feature.innerHTML = `<strong>特徴：</strong>${deptInfo.特徴 || "情報なし"}`;
+      content.appendChild(feature);
+
+      const detail = document.createElement("p");
+      detail.innerHTML = `<strong>詳細：</strong>${deptInfo.詳細 || "情報なし"}`;
+      content.appendChild(detail);
+    } else {
+      content.textContent = "この部署の情報は見つかりませんでした。";
+    }
+
+    // 本部のHTMLリンクも併記（部署ページではなく全体）
     const hq = departmentToHq[dept] || "設計開発本部";
     const hqHtmlPath = `hq_pages/${hq}.html`;
 
     const hqLink = document.createElement("a");
     hqLink.href = hqHtmlPath;
     hqLink.target = "_blank";
-    hqLink.className = "text-blue-600 hover:underline text-sm";
-    hqLink.textContent = "▶ 本部の詳細ページを見る";
-
-    try {
-      const htmlRes = await fetch(hqHtmlPath);
-      if (htmlRes.ok) {
-        const htmlText = await htmlRes.text();
-        content.innerHTML = htmlText;
-      } else {
-        content.textContent = "部署情報の読み込みに失敗しました。";
-      }
-    } catch (err) {
-      content.textContent = "部署情報の読み込み時にエラーが発生しました。";
-    }
+    hqLink.className = "text-blue-600 hover:underline text-sm block mt-2";
+    hqLink.textContent = `▶ ${hq}の詳細ページを見る`;
 
     card.appendChild(content);
     card.appendChild(hqLink);
