@@ -49,7 +49,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     const content = document.createElement("div");
     content.className = "text-sm text-gray-700 mb-2";
 
-    // 対象部署の特徴・詳細を表示
     const deptInfo = hqDetails[dept];
     if (deptInfo) {
       const feature = document.createElement("p");
@@ -63,7 +62,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       content.textContent = "この部署の情報は見つかりませんでした。";
     }
 
-    // 本部のHTMLリンクも併記（部署ページではなく全体）
+    // 本部ページへのリンク（中身は表示しない）
     const hq = departmentToHq[dept] || "設計開発本部";
     const hqHtmlPath = `hq_pages/${hq}.html`;
 
